@@ -66,13 +66,15 @@ static NSString *VK_AUTHORIZE_URL_STRING = @"vkauthorize://authorize";
     if(![VKSdk isLoggedIn]) {
         [self vkLoginWithPermissions:permissions andBlock:^(NSString *token, NSString *error) {
             if(token) {
+                VKAccessToken *vkToken = [VKSdk accessToken];
                 VKRequest *req = [VKRequest requestWithMethod:@"users.get" parameters:@{@"fields": @"id, nickname, first_name, last_name, sex, bdate, timezone, photo, photo_big, city, country"}];
                 [req executeWithResultBlock:^(VKResponse *response) {
                     NSLog(@"User response %@", response);
                     
                     CDVPluginResult* pluginResult = nil;
                     loginDetails = [NSMutableDictionary new];
-                    loginDetails[@"token"] = token;
+                    loginDetails[@"token"] = vkToken.accessToken;
+                    loginDetails[@"email"] = vkToken.email;
                     if([response.json isKindOfClass:NSArray.class] && [(NSArray*)response.json count]>0 )
                         loginDetails[@"user"] = [response.json objectAtIndex:0];
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:loginDetails];
@@ -100,6 +102,7 @@ static NSString *VK_AUTHORIZE_URL_STRING = @"vkauthorize://authorize";
                 CDVPluginResult* pluginResult = nil;
                 loginDetails = [NSMutableDictionary new];
                 loginDetails[@"token"] = token.accessToken;
+                loginDetails[@"email"] = token.email;
                 if([response.json isKindOfClass:NSArray.class] && [(NSArray*)response.json count]>0 )
                     loginDetails[@"user"] = [response.json objectAtIndex:0];
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:loginDetails];
