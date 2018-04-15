@@ -153,9 +153,20 @@ static NSString *VK_AUTHORIZE_URL_STRING = @"vkauthorize://authorize";
         //sh.uploadImages = @[[VKUploadImage uploadImageWithData:imageData andParams:nil]];
         UIViewController *vc = [self findViewController];
         sh.dismissAutomatically = YES;
+        
+        [sh setCompletionHandler:^(VKShareDialogController *controller, VKShareDialogControllerResult result) {
+            [vc dismissViewControllerAnimated:YES completion:nil];
+            CDVPluginResult* pluginResult = nil;
+            if(result == VKShareDialogControllerResultCancelled) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            }
+            
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }];
+        
         [vc presentViewController:sh animated:YES completion:nil];
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 
